@@ -75,53 +75,6 @@ exports.signup = async (req, res) => {
     }
 }
 
-
-// exports.signup = async (req, res) => {
-//     try {
-//         const { name, email, gender, mobileNumber, password, otp } = req.body;
-//         const userExist = await userModel.findOne({ email: email });
-//         if (userExist) {
-//             return res.send({ message: "User already registered" });
-//         } else if (!otp) {
-//             return res.send({ responseMessage: "Please provide OTP for verification" });
-//         } else {
-//             if (req.body.password !== req.body.confirmPassword) {
-//                 return res.send({ responseMessage: "Password and confirm password do not match" });
-//             }
-//             // Verify the provided OTP
-//             // You need to implement the OTP verification logic here.
-//             // For demonstration purposes, let's assume the provided OTP is correct.
-//             // Replace this with your actual OTP verification logic.
-//             const isValidOTP = true; // Replace this with your OTP verification logic
-//             if (!isValidOTP) {
-//                 return res.send({ responseMessage: "Invalid OTP" });
-//             }
-//         }
-//         const saltRounds = 10;
-//         const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-//         // Save user to database only if OTP is provided and verified
-//         const user = new userModel({
-//             name,
-//             email,
-//             gender,
-//             mobileNumber,
-//             password: hashedPassword
-//         });
-//         await user.save();
-
-//         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-
-//         res.status(200).json({
-//             message: 'User registered successfully. Please verify your email.',
-//             user: user,
-//             auth: token
-//         });
-//     } catch (error) {
-//         res.status(500).json({ error: 'Something went wrong.', result: error.message });
-//     }
-// };
-
 exports.verifyEmailOtp = async (req, res) => {
     const { otp } = req.body;
     try {
@@ -135,8 +88,9 @@ exports.verifyEmailOtp = async (req, res) => {
         }
         user.emailOtp = null;
         user.emailOtpExpires = null;
+        user.isVerified = true;
         await user.save();
-        return res.status(200).json({ responseMessage: 'OTP verified successfully. Signup completed' });
+        return res.status(200).json({ responseMessage: 'OTP verified successfully' });
     } catch (error) {
         return res.status(500).json({ responseMessage: "Error during OTP verification", responseResult: error.message });
     }
@@ -161,12 +115,17 @@ exports.verifyMobileOtp = async (req, res) => {
         return res.status(500).json({ responseMessage: "Error during OTP verification", responseResult: error.message });
     }
 }
+
 exports.logIn = async (req, res) => {
     try {
         if (req.body.password && req.body.email) {
             const result = await userModel.findOne({ email: req.body.email });
             if (!result) {
                 return res.status(401).json({ message: 'User not found' });
+            }
+
+            if (!result.isVerified) {
+                return res.status(401).json({ message: 'Please verify your OTP first' });
             }
 
             const passCheck = await bcrypt.compare(req.body.password, result.password);
@@ -192,7 +151,7 @@ exports.logIn = async (req, res) => {
         console.error('Error during login:', error);
         return res.status(500).json({ message: 'Internal server error' });
     }
-};
+}
 
 exports.editProfile = async (req, res) => {
     const updateField = req.body;
@@ -225,7 +184,8 @@ exports.editProfile = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: 'Internal server error', responseResult: error.message });
     }
-};
+}
+
 exports.forgotPassword = async (req, res) => {
     try {
         let email = req.body.email
@@ -246,6 +206,7 @@ exports.forgotPassword = async (req, res) => {
         return res.send({ statusCode: 500, message: 'Invalid Input' })
     }
 }
+
 exports.resetPassword = async (req, res) => {
     try {
         const { password, confirmPassword } = req.body;
@@ -278,5 +239,30 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ error: "Something went wrong" });
     }
 };
+
+exports.resetPassword = async (req, res) => {
+    const { email } = req.body;
+  
+    // Check if email is provided
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+  
+    // Generate new OTP
+    const newOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+  
+    // Store OTP in database
+    otpDatabase[email] = newOTP;
+  
+    // Send OTP via email (You should replace this with your actual sending logic)
+    sendEmail(email, newOTP)
+      .then(() => {
+        res.status(200).json({ message: 'OTP resent successfully' });
+      })
+      .catch((error) => {
+        console.error('Error sending OTP:', error);
+        res.status(500).json({ error: 'Failed to send OTP' });
+      });
+  }
 
 

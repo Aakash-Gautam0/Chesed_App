@@ -43,6 +43,10 @@ const userSchema = new schema({
         type: String,
         enum: ['Active', 'Inactive', 'Delete'],
         default: 'Active'
+    },
+    isVerified:{
+        type:Boolean,
+        default:"false"
     }
 
 

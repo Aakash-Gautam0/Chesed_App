@@ -17,7 +17,7 @@ exports.autoMail = async (to, subject, text) => {
   //Nodemailer OPTIONS
   
   var mailOptions = {
-    from: '"otp for signup " <aakashgautam@quytech.com>',
+    from: '"OTP " <aakashgautam@quytech.com>',
     to: to, 
     subject: subject,
     text: text

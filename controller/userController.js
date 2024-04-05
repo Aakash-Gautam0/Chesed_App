@@ -79,7 +79,6 @@ exports.verifyEmailOtp = async (req, res) => {
     const { otp } = req.body;
     try {
         const userObj = req.user
-        console.log(userObj, "aaaaaaaaaaaaaaaaaaaaaaaaaaa");
         const user = await userModel.findOne({ _id: userObj.userId });
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
@@ -189,16 +188,23 @@ exports.editProfile = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
     try {
-        let email = req.body.email
-        let result = await userModel.findOne({ email })
-        if (!result) {
-            return res.send({ statusCode: 404, message: 'User Not Found' })
+        const userObj = req.user
+        const user = await userModel.findOne({ _id: userObj.userId });
+        if (!user) {
+            return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         } else {
+            const emailOtp = generateOTPEmail()
+            const email = user.email;
+
+            if (!email) {
+                return res.status(400).json({ responseCode: 400, responseMessage: "Email not found for the user" });
+            }
             let subject = `Reset your Password`
-            let html = `http://localhost:3000/api/resetPassword?_id=${result._id}`
+            let text = `Your OTP for forgot password : ${emailOtp}`;
 
-            let resetMail = await mailer.autoMail(to = email, subject, html)
-
+            let resetMail = await mailer.autoMail(to = email, subject, text)
+            user.emailOtp = emailOtp
+            await user.save()
             return res.send({ statusCode: 201, message: "Email Sent Successfully", Result: resetMail })
         }
 
@@ -217,8 +223,6 @@ exports.resetPassword = async (req, res) => {
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
-
-        // let id = req.query._id
 
         if (!password || !confirmPassword) {
             return res.status(400).json({ error: "Both password and confirm password fields are required" });
@@ -240,5 +244,27 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ error: "Something went wrong" });
     }
 };
+exports.resendOtp = async (req, res) => {
+    try {
+        const userObj = req.user
+        const user = await userModel.findOne({ _id: userObj.userId });
+        if (!user) {
+            return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
+        }
+        const emailOtp = generateOTPEmail()
+        const email = user.email;
+        let subject = `verify your otp`
+        let text = `Your OTP : ${emailOtp}`;
+
+        let resetMail = await mailer.autoMail(to = email, subject, text)
+        user.emailOtp = emailOtp
+        await user.save()
+        return res.send({ statusCode: 201, message: "otp Sent Successfully", Result: resetMail })
+    }catch(error){
+        return res.send({ statusCode: 500, message: 'Invalid Input',result:error.message })
+    }
+}
+
+
 
 

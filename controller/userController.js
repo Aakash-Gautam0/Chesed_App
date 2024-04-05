@@ -79,6 +79,7 @@ exports.verifyEmailOtp = async (req, res) => {
     const { otp } = req.body;
     try {
         const userObj = req.user
+        console.log(userObj, "aaaaaaaaaaaaaaaaaaaaaaaaaaa");
         const user = await userModel.findOne({ _id: userObj.userId });
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
@@ -195,7 +196,7 @@ exports.forgotPassword = async (req, res) => {
         } else {
             let subject = `Reset your Password`
             let html = `http://localhost:3000/api/resetPassword?_id=${result._id}`
-            
+
             let resetMail = await mailer.autoMail(to = email, subject, html)
 
             return res.send({ statusCode: 201, message: "Email Sent Successfully", Result: resetMail })
@@ -239,30 +240,5 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ error: "Something went wrong" });
     }
 };
-
-exports.resetPassword = async (req, res) => {
-    const { email } = req.body;
-  
-    // Check if email is provided
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-  
-    // Generate new OTP
-    const newOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-  
-    // Store OTP in database
-    otpDatabase[email] = newOTP;
-  
-    // Send OTP via email (You should replace this with your actual sending logic)
-    sendEmail(email, newOTP)
-      .then(() => {
-        res.status(200).json({ message: 'OTP resent successfully' });
-      })
-      .catch((error) => {
-        console.error('Error sending OTP:', error);
-        res.status(500).json({ error: 'Failed to send OTP' });
-      });
-  }
 
 

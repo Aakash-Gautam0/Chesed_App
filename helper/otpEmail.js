@@ -9,15 +9,15 @@ exports.autoMail = async (to, subject, text) => {
     port: 587,
     secure: true,
     auth: {
-      user: 'vikassharmargec@gmail.com',
-      pass: 'vbieewkoabhoqpid'
+      user: 'aakash.gautam@quytech.com',
+      pass: 'lryd czdd kkia ynvy '
      
     }
   })
   //Nodemailer OPTIONS
   
   var mailOptions = {
-    from: '"otp for signup " <vikassharmargec@gmail.com>',
+    from: '"otp for signup " <aakashgautam@quytech.com>',
     to: to, 
     subject: subject,
     text: text

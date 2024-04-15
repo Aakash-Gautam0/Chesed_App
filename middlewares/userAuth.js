@@ -8,8 +8,10 @@ const userAuthentication = async (req, res, next) => {
     if (authorization && authorization.startsWith('Bearer')) {
         try {
             const token = authorization.split(' ')[1];
-            const decoded = jwt.verify(token, jwtkey);
-            req.user = decoded;
+            const {userId} = jwt.verify(token, jwtkey);
+            console.log(userId,"222222");
+            // req.user = decoded;
+            req.user=await userModel.findById(userId).select("-password")
             next();
         } catch (error) {
             res.status(401).json({ message: "Invalid token" })

@@ -7,21 +7,21 @@ exports.createRideShareRqst = async (req, res) => {
 
   try {
     const { title, description, pickupLocation, whereTo, noOfMales, noOfFemale } = req.body;
-    const userObj = req.user;
-    const user = await userModel.findOne({ _id: userObj.userId });
-    
+    // const userObj = req.user;
+    const user = await userModel.findById( req.user._id);
+
     if (!user) {
       return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
     }
-    
-    const userName = user.name; 
-    
+
+    const userName = user.name;
+
     let category = await categoriesModel.findOne();
 
     if (!category) {
       category = new categoriesModel();
     }
-    
+
     const newRideShare = {
       title,
       description,
@@ -46,13 +46,13 @@ exports.createRideShareRqst = async (req, res) => {
 exports.createPackageTransport = async (req, res) => {
 
   try {
-    const { title, description,pickupLocation ,transportTo,noOfItems,totalWeight} = req.body;
-    const userObj = req.user
-    const user = await userModel.findOne({ _id: userObj.userId });
+    const { title, description, pickupLocation, transportTo, noOfItems, totalWeight } = req.body;
+    // const userObj = req.user
+    const user = await userModel.findById( req.user._id);
     if (!user) {
       return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
     }
-    const userName = user.name; 
+    const userName = user.name;
     let category = await categoriesModel.findOne();
     if (!category) {
       category = new categoriesModel();
@@ -80,13 +80,13 @@ exports.createPackageTransport = async (req, res) => {
 exports.createGemochFinder = async (req, res) => {
 
   try {
-    const { title, description ,location} = req.body;
-    const userObj = req.user
-    const user = await userModel.findOne({ _id: userObj.userId });
+    const { title, description, location } = req.body;
+    // const userObj = req.user
+    const user = await userModel.findById( req.user._id);
     if (!user) {
       return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
     }
-    const userName = user.name; 
+    const userName = user.name;
     let category = await categoriesModel.findOne();
     if (!category) {
       category = new categoriesModel();
@@ -117,7 +117,7 @@ exports.createAdvice = async (req, res) => {
     if (!user) {
       return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
     }
-    const userName = user.name; 
+    const userName = user.name;
     let category = await categoriesModel.findOne();
     if (!category) {
       category = new categoriesModel();
@@ -142,7 +142,6 @@ exports.createAdvice = async (req, res) => {
 exports.getAllDetails = async (req, res) => {
   try {
     const categories = await categoriesModel.findOne();
-    console.log(categories,"11111111111"); 
     if (!categories) {
       return res.status(404).json({ message: 'No details found' });
     }

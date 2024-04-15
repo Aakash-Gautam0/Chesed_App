@@ -4,6 +4,7 @@ const dotenv=require("dotenv")
 dotenv.config()
 const userRouter=require("./router/userRouter")
 const categoriesRouter=require("./router/categoriesRouter")
+const feedbackRouter=require("./router/feedbackRouter")
 const session=require("express-session")
 const passport=require("passport")
 require("./helper/googleAuth")
@@ -29,6 +30,7 @@ app.use(express.json())
 
 app.use("/api", userRouter)
 app.use("/api",categoriesRouter)
+app.use("/api",feedbackRouter)
 
 
 // //////////////////////////////////////////////////////

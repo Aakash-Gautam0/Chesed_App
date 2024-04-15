@@ -42,7 +42,7 @@ exports.signup = async (req, res) => {
         if (mobileNumber) {
             mobileOtp = generateOTPMobile();
             mobileOtpExpiry = mobileOtpExpiryTime();
-            // await phoneotp.sendOTPMobile(mobileNumber, mobileOtp);
+            await phoneotp.sendOTPMobile(mobileNumber, mobileOtp);
         }
 
         let profilePic;
@@ -78,8 +78,8 @@ exports.signup = async (req, res) => {
 exports.verifyEmailOtp = async (req, res) => {
     const { otp } = req.body;
     try {
-        const userObj = req.user
-        const user = await userModel.findOne({ _id: userObj.userId });
+        // const userObj = req.user
+        const user = await userModel.findById( req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -99,8 +99,8 @@ exports.verifyEmailOtp = async (req, res) => {
 exports.verifyMobileOtp = async (req, res) => {
     const { otp } = req.body;
     try {
-        const userObj = req.user
-        const user = await userModel.findOne({ _id: userObj.userId });
+        // const userObj = req.user
+        const user = await userModel.findById( req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -156,7 +156,7 @@ exports.logIn = async (req, res) => {
 exports.editProfile = async (req, res) => {
     const updateField = req.body;
     try {
-        const user = await userModel.findById(req.user.userId)
+        const user = await userModel.findById( req.user._id )
         console.log(user);
         if (updateField.email) {
             // Generate OTP
@@ -170,7 +170,7 @@ exports.editProfile = async (req, res) => {
 
             user.emailOtp = emailOtp
             user.emailOtpExpires = OtpExpires
-            console.log(user.emailOtp);
+            console.log(user.emailOtp);1
             await user.save()
         }
 
@@ -188,14 +188,14 @@ exports.editProfile = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
     try {
-        const userObj = req.user
-        const user = await userModel.findOne({ _id: userObj.userId });
+        // const userObj = req.user
+        const user = await userModel.findById( req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         } else {
             const emailOtp = generateOTPEmail()
             const email = user.email;
-
+     
             if (!email) {
                 return res.status(400).json({ responseCode: 400, responseMessage: "Email not found for the user" });
             }
@@ -207,8 +207,6 @@ exports.forgotPassword = async (req, res) => {
             await user.save()
             return res.send({ statusCode: 201, message: "Email Sent Successfully", Result: resetMail })
         }
-
-
     } catch (error) {
         return res.send({ statusCode: 500, message: 'Invalid Input' })
     }
@@ -218,8 +216,8 @@ exports.resetPassword = async (req, res) => {
     try {
         const { password, confirmPassword } = req.body;
 
-        const userObj = req.user
-        const user = await userModel.findOne({ _id: userObj.userId });
+        // const userObj = req.user
+        const user = await userModel.findById( req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -244,10 +242,11 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ error: "Something went wrong" });
     }
 };
+
 exports.resendOtp = async (req, res) => {
     try {
-        const userObj = req.user
-        const user = await userModel.findOne({ _id: userObj.userId });
+        // const userObj = req.user
+        const user = await userModel.findById( req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -260,8 +259,8 @@ exports.resendOtp = async (req, res) => {
         user.emailOtp = emailOtp
         await user.save()
         return res.send({ statusCode: 201, message: "otp Sent Successfully", Result: resetMail })
-    }catch(error){
-        return res.send({ statusCode: 500, message: 'Invalid Input',result:error.message })
+    } catch (error) {
+        return res.send({ statusCode: 500, message: 'Invalid Input', result: error.message })
     }
 }
 

@@ -16,7 +16,7 @@ exports.createRideShareRqst = async (req, res) => {
 
     const userName = user.name;
 
-    let category = await categoriesModel.findOne();
+    let category = await categoriesModel.findOne();  
 
     if (!category) {
       category = new categoriesModel();
@@ -29,7 +29,7 @@ exports.createRideShareRqst = async (req, res) => {
       whereTo,
       noOfMales,
       noOfFemale,
-      userName // Include userName in the newRideShare object
+      userName 
     };
 
     category.rideShare.push(newRideShare);

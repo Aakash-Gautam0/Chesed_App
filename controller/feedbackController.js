@@ -3,7 +3,6 @@ const userModel = require("../model/userModel")
 
 exports.create = async (req, res) => {
     try {
-        console.log(req.user, "111111111111111111111111111");
         const { title, description } = req.body
         const usertitle = await feedbackModel.findOne({ title: title })
         if (usertitle) {

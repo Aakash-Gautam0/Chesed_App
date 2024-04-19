@@ -1,18 +1,19 @@
 const express = require("express")
 const app = express()
-const dotenv=require("dotenv")
+const dotenv = require("dotenv")
 dotenv.config()
-const userRouter=require("./router/userRouter")
-const categoriesRouter=require("./router/categoriesRouter")
-const feedbackRouter=require("./router/feedbackRouter")
-const session=require("express-session")
-const passport=require("passport")
+const adminRouter = require("./router/adminRouter")
+const userRouter = require("./router/userRouter")
+const categoriesRouter = require("./router/categoriesRouter")
+const feedbackRouter = require("./router/feedbackRouter")
+const session = require("express-session")
+const passport = require("passport")
 require("./helper/googleAuth")
-const path=require('path')
+const path = require('path')
 
 
 
-app.use(express.static(path.join(__dirname,'client')));
+app.use(express.static(path.join(__dirname, 'client')));
 
 const bodyParser = require('body-parser');
 
@@ -28,43 +29,46 @@ app.use(bodyParser.json());
 
 app.use(express.json())
 
+
+app.use("/api", adminRouter)
+
 app.use("/api", userRouter)
-app.use("/api",categoriesRouter)
-app.use("/api",feedbackRouter)
+app.use("/api", categoriesRouter)
+app.use("/api", feedbackRouter)
 
 
 // //////////////////////////////////////////////////////
-function isLogggedIn(req,res,next){
+function isLogggedIn(req, res, next) {
     req.user ? next() : res.status(401).send("Unauthorized");
 }
 
 
 app.use(session({
-    secret:process.env.JWT_SECRET_KEY,
-    resave:false,
-    saveUninitialized:true,
-    cookie:{secure:false}  
+    secret: process.env.JWT_SECRET_KEY,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
 }))
 
 app.use(passport.initialize());
 app.use(passport.session())
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.sendFile('index.html')
 })
 app.get('/auth/google',
-  passport.authenticate('google', { scope: ['email' ,'profile'] }));
+    passport.authenticate('google', { scope: ['email', 'profile'] }));
 
-app.get('/auth/google/callback', 
-  passport.authenticate('google', { 
-  successRedirect:'/auth/protected',
-  failureRedirect:'/auth/google/failure'
+app.get('/auth/google/callback',
+    passport.authenticate('google', {
+        successRedirect: '/auth/protected',
+        failureRedirect: '/auth/google/failure'
 
-   }),
+    }),
 );
-app.get('/auth/google/failure',(req,res)=>{
+app.get('/auth/google/failure', (req, res) => {
     res.send("somthing Went wrong")
 })
-app.get('/auth/protected',isLogggedIn,(req,res)=>{
+app.get('/auth/protected', isLogggedIn, (req, res) => {
     let name = req.user.displayName;
     res.send(`WELCOME ${name}`)
 })

@@ -79,7 +79,7 @@ exports.verifyEmailOtp = async (req, res) => {
     const { otp } = req.body;
     try {
         // const userObj = req.user
-        const user = await userModel.findById( req.user._id);
+        const user = await userModel.findById(req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -100,7 +100,7 @@ exports.verifyMobileOtp = async (req, res) => {
     const { otp } = req.body;
     try {
         // const userObj = req.user
-        const user = await userModel.findById( req.user._id);
+        const user = await userModel.findById(req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -156,7 +156,7 @@ exports.logIn = async (req, res) => {
 exports.editProfile = async (req, res) => {
     const updateField = req.body;
     try {
-        const user = await userModel.findById( req.user._id )
+        const user = await userModel.findById(req.user._id)
         console.log(user);
         if (updateField.email) {
             // Generate OTP
@@ -170,7 +170,7 @@ exports.editProfile = async (req, res) => {
 
             user.emailOtp = emailOtp
             user.emailOtpExpires = OtpExpires
-            console.log(user.emailOtp);1
+            console.log(user.emailOtp); 1
             await user.save()
         }
 
@@ -189,13 +189,13 @@ exports.editProfile = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         // const userObj = req.user
-        const user = await userModel.findById( req.user._id);
+        const user = await userModel.findById(req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         } else {
             const emailOtp = generateOTPEmail()
             const email = user.email;
-     
+
             if (!email) {
                 return res.status(400).json({ responseCode: 400, responseMessage: "Email not found for the user" });
             }
@@ -217,7 +217,7 @@ exports.resetPassword = async (req, res) => {
         const { password, confirmPassword } = req.body;
 
         // const userObj = req.user
-        const user = await userModel.findById( req.user._id);
+        const user = await userModel.findById(req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -246,7 +246,7 @@ exports.resetPassword = async (req, res) => {
 exports.resendOtp = async (req, res) => {
     try {
         // const userObj = req.user
-        const user = await userModel.findById( req.user._id);
+        const user = await userModel.findById(req.user._id);
         if (!user) {
             return res.status(400).json({ responseCode: 400, responseMessage: "User not found" });
         }
@@ -264,6 +264,24 @@ exports.resendOtp = async (req, res) => {
     }
 }
 
+exports.logOut = async (req, res) => {
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Error destroying session:', err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+            res.status(200).json({ message: 'Logout successful' });
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Something went Wrong",result: error.message })
 
+    }
+}
+exports.termsAndConditon=async(req,res)=>{
+    const termsAndConditionsContent = `
+Welcome to our platform! By accessing or using our services, you agree to comply with and be bound by the following terms and conditions... (your terms and conditions content goes here)
+`;
+res.send(termsAndConditionsContent);
 
-
+}
